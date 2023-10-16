@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigHub Iscriviti</title>
+    <style>
+        @font-face {
+            font-family: 'earthorbiter';
+            src: url('earthorbiter.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            background-color: black;
+            text-align: center;
+            color: white;
+            padding: 20px;
+            font-family: 'earthorbiter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .logos {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .logos img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .button-container {
+            margin-top: 40px;
+        }
+
+        .glitch-button {
+            display: inline-block;
+            padding: 10px 20px;
+            border: 2px solid transparent;
+            border-image: linear-gradient(90deg, purple, blue);
+            border-image-slice: 1;
+            border-radius: 5px;
+            font-size: 20px;
+            font-family: 'earthorbiter', sans-serif;
+            cursor: pointer;
+            position: relative;
+            background: linear-gradient(90deg, purple, blue);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            transition: border 0.3s;
+            animation: button-light-up 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes button-light-up {
+            0% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .text-with-gradient {
+            background: linear-gradient(90deg, purple, blue);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-family: 'earthorbiter', sans-serif;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title-text">GigHub</h1>
+    <div class="logos">
+        <img src="logo.gif" alt="Logo TMW" width="100">
+    </div>
+    <div>
+        <h2>Contattaci</h2>
+        <form id="contactForm">
+            <label for="name">Nome Freelancer o Nome Aziendale:</label>
+            <input type="text" id="name" name="name" required><br>
+
+            <label for="email">Email e Altri Contatti:</label>
+            <input type="email" id="email" name="email" required><br>
+
+            <label for="interests">Presentazione Iniziale di Interessi, Hobby, ecc.:</label>
+            <textarea id="interests" name="interests" required></textarea><br>
+
+            <label for="services">Presentazione dell'Azienda e dei Servizi che Proponi:</label>
+            <textarea id="services" name="services" required></textarea><br>
+
+            <button class="glitch-button" onclick="submitForm()">Invia</button>
+        </form>
+    </div>
+
+    <div class="text-with-gradient">Design & Script by AgonyLecter &copy; 2023</div>
+
+    <script>
+        function submitForm() {
+            var form = document.getElementById('contactForm');
+            var name = form.elements.name.value;
+            var email = form.elements.email.value;
+            var interests = form.elements.interests.value;
+            var services = form.elements.services.value;
+
+            // Creazione di un oggetto JSON con i dati del modulo
+            var data = {
+                "Nome Freelancer o Nome Aziendale": name,
+                "Email e Altri Contatti": email,
+                "Presentazione Iniziale di Interessi, Hobby, ecc.": interests,
+                "Presentazione dell'Azienda e dei Servizi che Proponi": services
+            };
+
+            // Effettua una richiesta API per aggiornare il file JSON nel repository GitHub
+            var apiUrl = 'https://api.github.com/repos/AgonyLecter/GigHub/contents/data.json';
+            var token = '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'; // Sostituisci con il tuo token
+            var commitMessage = 'Aggiornamento dati da modulo di contatto';
+
+            fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'token ' + token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Ottieni il file JSON esistente
+                var existingData = JSON.parse(atob(data.content));
+
+                // Aggiungi i nuovi dati al file JSON
+                existingData.push(data);
+
+                // Converti il file JSON aggiornato in una stringa JSON
+                var updatedJson = JSON.stringify(existingData);
+
+                // Effettua una richiesta API per sovrascrivere il file JSON
+                return fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'token ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: commitMessage,
+                        content: btoa(updatedJson), // Codifica il JSON in base64
+                        sha: data.sha
+                    })
+                });
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Effettua qui l'azione desiderata dopo l'invio dei dati
+                alert('Dati inviati con successo!');
+            })
+            .catch(error => console.error(error));
+        }
+    </script>
+</body>
+</html>
